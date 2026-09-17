@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Service Blueprint — Smart HERO Profile</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple-dark:  #2D2B8F;
+    --purple:       #4B48C8;
+    --purple-light: #7B79E8;
+    --customer-bg:  #EDE9FF;
+    --customer-bd:  #C4BFFF;
+    --touch-bg:     #D4D0FF;
+    --touch-bd:     #A09AFF;
+    --front-bg:     #C4C0FF;
+    --front-bd:     #8880F8;
+    --back-bg:      #C8F0D0;
+    --back-bd:      #72C98A;
+    --support-bg:   #D8F5DC;
+    --support-bd:   #90D8A0;
+    --moment-colors: #6366F1, #8B5CF6, #EC4899, #F59E0B, #10B981, #3B82F6, #EF4444, #14B8A6;
+    --white: #FFFFFF;
+    --dark:  #1A1A2E;
+    --text:  #2D2D4E;
+    --muted: #6B7280;
+    --line-color: #94A3B8;
+    --fail: #FEE2E2;
+    --fail-bd: #FCA5A5;
+  }
+
+  body {
+    font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+    background: #F0F0F8;
+    color: var(--text);
+    min-width: 1400px;
+    padding: 0 0 48px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, var(--purple-dark) 0%, #1E1B8F 50%, #2D1B69 100%);
+    color: white;
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px solid #4B48C8;
+  }
+  .header-left h1 {
+    font-size: 26px; font-weight: 800;
+    letter-spacing: -.03em;
+    margin-bottom: 4px;
+  }
+  .header-left p { font-size: 13px; opacity: .7; }
+  .header-meta {
+    display: flex; gap: 20px; align-items: center;
+  }
+  .meta-pill {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,.9);
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex; gap: 16px; align-items: center;
+    padding: 12px 40px;
+    background: white;
+    border-bottom: 1px solid #E2E8F0;
+    flex-wrap: wrap;
+  }
+  .legend-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-right: 4px; }
+  .legend-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--text);
+  }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+  .legend-line { width: 28px; height: 2px; }
+  .fail-tag {
+    background: var(--fail); border: 1px solid var(--fail-bd);
+    border-radius: 4px; padding: 2px 8px;
+    font-size: 10px; font-weight: 700; color: #DC2626;
+  }
+
+  /* ── BLUEPRINT WRAP ── */
+  .blueprint-wrap {
+    padding: 24px 32px;
+    overflow-x: auto;
+  }
+
+  .blueprint {
+    display: grid;
+    grid-template-columns: 200px repeat(8, 1fr);
+    gap: 0;
+    min-width: 1280px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 32px rgba(0,0,0,.1);
+  }
+
+  /* ── MOMENT HEADERS ── */
+  .moment-header-spacer {
+    background: var(--dark);
+    padding: 14px 12px;
+    display: flex; align-items: center;
+    border-right: 1px solid rgba(255,255,255,.08);
+  }
+  .moment-header-spacer span {
+    color: rgba(255,255,255,.4);
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+  }
+
+  .moment-header {
+    background: var(--dark);
+    padding: 12px 10px;
+    text-align: center;
+    border-right: 1px solid rgba(255,255,255,.08);
+    position: relative;
+  }
+  .moment-num {
+    font-size: 10px; font-weight: 700;
+    color: rgba(255,255,255,.4);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 4px;
+  }
+  .moment-name {
+    font-size: 13px; font-weight: 800;
+    color: white;
+    letter-spacing: -.01em;
+  }
+  .moment-sub {
+    font-size: 9px;
+    color: rgba(255,255,255,.5);
+    margin-top: 3px;
+    line-height: 1.3;
+  }
+  .moment-bar {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  /* ── ROW LABELS ── */
+  .row-label {
+    padding: 16px 14px;
+    display: flex; flex-direction: column; justify-content: center;
+    border-right: 2px solid;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    position: relative;
+  }
+  .row-label h3 {
+    font-size: 13px; font-weight: 800;
+    letter-spacing: -.01em;
+    margin-bottom: 4px;
+  }
+  .row-label p {
+    font-size: 9px; font-weight: 500;
+    opacity: .65;
+    line-height: 1.4;
+  }
+  .row-label-icon {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .row-customer .row-label  { background: var(--customer-bg); border-color: var(--customer-bd); color: #3730A3; }
+  .row-touch .row-label     { background: var(--touch-bg);    border-color: var(--touch-bd);    color: #3730A3; }
+  .row-front .row-label     { background: var(--front-bg);    border-color: var(--front-bd);    color: #3730A3; }
+  .row-back .row-label      { background: var(--back-bg);     border-color: var(--back-bd);     color: #166534; }
+  .row-support .row-label   { background: var(--support-bg);  border-color: var(--support-bd);  color: #166534; }
+
+  /* ── CELLS ── */
+  .cell {
+    padding: 10px;
+    border-right: 1px solid rgba(0,0,0,.06);
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    min-height: 140px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
+  .row-customer .cell { background: #FAF8FF; }
+  .row-touch .cell    { background: #F5F3FF; }
+  .row-front .cell    { background: #F0EEFF; }
+  .row-back .cell     { background: #F0FDF4; }
+  .row-support .cell  { background: #F6FEF8; }
+
+  /* ── STICKY NOTES ── */
+  .note {
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 10.5px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--text);
+    position: relative;
+    flex-shrink: 0;
+    cursor: default;
+    transition: transform .15s, box-shadow .15s;
+    border: 1px solid transparent;
+  }
+  .note:hover {
+    transform: translateY(-2px) rotate(.5deg);
+    box-shadow: 0 6px 16px rgba(0,0,0,.12);
+    z-index: 10;
+  }
+  .note strong { display: block; font-weight: 700; margin-bottom: 2px; font-size: 11px; }
+  .note.purple { background: #EDE9FF; border-color: #C4BFFF; }
+  .note.blue   { background: #DBEAFE; border-color: #93C5FD; }
+  .note.green  { background: #DCFCE7; border-color: #86EFAC; }
+  .note.amber  { background: #FEF3C7; border-color: #FCD34D; }
+  .note.pink   { background: #FCE7F3; border-color: #F9A8D4; }
+  .note.gray   { background: #F3F4F6; border-color: #D1D5DB; }
+  .note.red    { background: #FEE2E2; border-color: #FCA5A5; }
+  .note.teal   { background: #CCFBF1; border-color: #5EEAD4; }
+
+  /* fail point */
+  .fail-point {
+    background: #FFF1F2;
+    border: 1.5px dashed #F87171;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 10px; font-weight: 600;
+    color: #DC2626;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .fail-point::before { content: "⚠️"; font-size: 12px; }
+
+  /* ── DIVIDER LINES ── */
+  .line-row {
+    grid-column: 1 / -1;
+    display: flex; align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    height: 32px;
+    position: relative;
+  }
+  .line-row-inner {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%;
+  }
+  .line-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase;
+    white-space: nowrap;
+    padding: 3px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .line-dash {
+    flex: 1;
+    height: 1.5px;
+    border-top: 2px dashed;
+  }
+
+  .line-interaction { background: #EEF2FF; }
+  .line-interaction .line-label { background: var(--purple); color: white; }
+  .line-interaction .line-dash  { border-color: var(--purple-light); }
+
+  .line-visibility { background: #F0FFF4; }
+  .line-visibility .line-label { background: #059669; color: white; }
+  .line-visibility .line-dash  { border-color: #6EE7B7; }
+
+  .line-internal { background: #FFF7ED; }
+  .line-internal .line-label { background: #D97706; color: white; }
+  .line-internal .line-dash  { border-color: #FCD34D; }
+
+  /* ── EMOTION BAR (journey arc) ── */
+  .emotion-bar-wrap {
+    padding: 0 32px 16px;
+  }
+  .emotion-bar-label {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: 8px;
+  }
+  .emotion-track {
+    display: grid;
+    grid-template-columns: 200px repeat(8, 1fr);
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #E2E8F0;
+    overflow: hidden;
+  }
+  .emotion-label-cell {
+    background: var(--dark);
+    padding: 12px 14px;
+    display: flex; align-items: center;
+  }
+  .emotion-label-cell span {
+    color: rgba(255,255,255,.7);
+    font-size: 10px; font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+  .emotion-cell {
+    padding: 10px 8px;
+    border-left: 1px solid #E2E8F0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 4px;
+  }
+  .emotion-face { font-size: 22px; }
+  .emotion-text {
+    font-size: 9px; font-weight: 600;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  /* ── TOOLTIP ── */
+  .note[data-tip] { position: relative; }
+  .note[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%; transform: translateX(-50%);
+    background: #1A1A2E;
+    color: white;
+    font-size: 10px; font-weight: 500;
+    padding: 5px 9px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .2s;
+    z-index: 100;
+  }
+  .note[data-tip]:hover::after { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <h1>Service Blueprint — Smart HERO Profile</h1>
+    <p>มุมมองช่างพาร์ทเนอร์ (Installer Journey) · Q-CHANG Credentialing Platform · สิงหาคม 2026</p>
+  </div>
+  <div class="header-meta">
+    <div class="meta-pill">5 Lanes</div>
+    <div class="meta-pill">8 Moments</div>
+    <div class="meta-pill">⚠️ 6 Fail Points</div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <span class="legend-label">Legend:</span>
+  <div class="legend-item"><div class="legend-dot" style="background:#EDE9FF;border:1px solid #C4BFFF;"></div> Customer / Touchpoint</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#C4C0FF;border:1px solid #8880F8;"></div> Frontstage</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#C8F0D0;border:1px solid #72C98A;"></div> Backstage / Support</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FEE2E2;border:1.5px dashed #FCA5A5;"></div> <span class="fail-tag">⚠️ Fail Point</span></div>
+  <div class="legend-item" style="margin-left:auto;font-size:11px;color:var(--muted);">💡 Hover บนแต่ละ Note เพื่อดู detail</div>
+</div>
+
+<div class="blueprint-wrap">
+<div class="blueprint">
+
+  <!-- ══ MOMENT HEADERS ══ -->
+  <div class="moment-header-spacer"><span>Lane / Moment</span></div>
+
+  <div class="moment-header">
+    <div class="moment-bar" style="background:#6366F1;"></div>
+    <div class="moment-num">01</div>
+    <div class="moment-name">Discover</div>
+    <div class="moment-sub">รู้จัก Profile<br>ครั้งแรก</div>
+  </div>
+  <div class="moment-header">
+    <div class="moment-bar" style="background:#8B5CF6;"></div>
+    <div class="moment-num">02</div>
+    <div class="moment-name">Onboard</div>
+    <div class="moment-sub">เริ่ม Fill<br>ข้อมูล</div>
+  </div>
+  <div class="moment-header">
+    <div class="moment-bar" style="background:#EC4899;"></div>
+    <div class="moment-num">03</div>
+    <div class="moment-name">Build</div>
+    <div class="moment-sub">สะสม Badge<br>& Performance</div>
+  </div>
+  <div class="moment-header">
+    <div class="moment-bar" style="background:#F59E0B;"></div>
+    <div class="moment-num">04</div>
+    <div class="moment-name">Activate</div>
+    <div class="moment-sub">ได้ Tier แรก<br>Unlock สิทธิ์</div>
+  </div>
+  <div class="moment-header">
+    <div class="moment-bar" style="background:#10B981;"></div>
+    <div class="moment-num">05</div>
+    <div class="moment-name">Campaign</div>
+    <div class="moment-sub">เข้าร่วม<br>Gamification</div>
+  </div>
+  <div class="moment-header">
+    <div class="moment-bar" style="background:#3B82F6;"></div>
+    <div class="moment-num">06</div>
+    <div class="moment-name">Earn Premium</div>
+    <div class="moment-sub">ได้งานผ่าน<br>Profile</div>
+  </div>
+  <div class="moment-header">
+    <div class="moment-bar" style="background:#EF4444;"></div>
+    <div class="moment-num">07</div>
+    <div class="moment-name">Financial</div>
+    <div class="moment-sub">ขอเอกสาร<br>ธนาคาร</div>
+  </div>
+  <div class="moment-header">
+    <div class="moment-bar" style="background:#14B8A6;"></div>
+    <div class="moment-num">08</div>
+    <div class="moment-name">Retain / Grow</div>
+    <div class="moment-sub">ขึ้น Tier<br>หรือ Refer</div>
+  </div>
+
+  <!-- ══ ROW 1: CUSTOMER ACTIONS ══ -->
+  <div class="row-customer" style="display:contents;">
+    <div class="row-label">
+      <div class="row-label-icon">👷</div>
+      <h3>Customer Actions</h3>
+      <p>ช่างทำอะไร<br>ในแต่ละ Moment?</p>
+    </div>
+
+    <div class="cell">
+      <div class="note purple" data-tip="Entry point แรกของ Journey"><strong>ได้รับ Notification</strong>จาก LINE OA / Discord เรื่อง Smart HERO Profile</div>
+      <div class="note blue">ดูวิดีโอ 60 วิ อธิบาย ประโยชน์ของ Profile</div>
+    </div>
+    <div class="cell">
+      <div class="note purple"><strong>กด "เริ่มสร้าง Profile"</strong>บนหน้า App</div>
+      <div class="note blue">กรอกข้อมูลพื้นฐาน: ประเภทงาน, พื้นที่บริการ</div>
+      <div class="fail-point">ช่างหยุดกลางคันเพราะฟอร์มยาวเกิน</div>
+    </div>
+    <div class="cell">
+      <div class="note purple"><strong>รับงานปกติ</strong>ผ่าน App ต่อเนื่อง</div>
+      <div class="note blue">เข้า Academy ทำ Skill Test เพื่อรับ Badge</div>
+      <div class="note amber">ดูแผนภาพ "เหลืออีกกี่ Badge ถึง HERO"</div>
+    </div>
+    <div class="cell">
+      <div class="note amber"><strong>รับ Notification</strong>"ยินดีด้วย! คุณขึ้นเป็น HERO"</div>
+      <div class="note purple">เปิดดู Profile หน้าใหม่ที่ Unlock แล้ว</div>
+      <div class="note green">แชร์ Public Profile URL ให้ลูกค้าเก่า</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>รับ Mission ใหม่</strong>จาก Campaign Banner</div>
+      <div class="note blue">ทำงานให้ครบตาม Condition ของ Campaign</div>
+      <div class="fail-point">ช่างไม่เข้าใจ Condition ของ Campaign</div>
+    </div>
+    <div class="cell">
+      <div class="note blue"><strong>รับ Job Offer</strong>จาก Premium Job Queue</div>
+      <div class="note green">ลูกค้าเลือกช่างโดยดูจาก Profile โดยตรง</div>
+      <div class="note teal">Charge ราคาสูงขึ้นเพราะ Profile แข็ง</div>
+    </div>
+    <div class="cell">
+      <div class="note amber"><strong>กด "ขอเอกสาร"</strong>ในหน้า Document Center</div>
+      <div class="note blue">รับ PDF หนังสือรับรองรายได้ทาง App</div>
+      <div class="fail-point">เอกสารไม่ถูก Format ที่ธนาคารต้องการ</div>
+    </div>
+    <div class="cell">
+      <div class="note teal"><strong>รับ Badge LEGEND</strong>และสิทธิ์พิเศษใหม่</div>
+      <div class="note green">Refer ช่างใหม่เข้าระบบผ่าน Referral Link</div>
+      <div class="note purple">ตั้งเป็น "Smart Hero Ambassador" อาสา</div>
+    </div>
+  </div>
+
+  <!-- ══ ROW 2: TOUCHPOINTS ══ -->
+  <div class="row-touch" style="display:contents;">
+    <div class="row-label">
+      <div class="row-label-icon">📱</div>
+      <h3>Touchpoints</h3>
+      <p>ช่องทางที่ช่าง<br>สัมผัสกับระบบ</p>
+    </div>
+
+    <div class="cell">
+      <div class="note blue"><strong>LINE OA</strong>Broadcast + Push</div>
+      <div class="note purple">Discord Announcement</div>
+      <div class="note pink">วิดีโอ Social Media (FB/IG Reels)</div>
+    </div>
+    <div class="cell">
+      <div class="note blue"><strong>Q-CHANG App</strong>หน้า Profile Setup</div>
+      <div class="note purple">Onboarding Walkthrough (Tutorial)</div>
+      <div class="fail-point">App Crash ระหว่าง Upload รูป</div>
+    </div>
+    <div class="cell">
+      <div class="note blue"><strong>Q-CHANG App</strong>หน้า My Performance</div>
+      <div class="note purple">Q-CHANG Academy Web / App</div>
+      <div class="note amber">Progress Notification ทุกสัปดาห์</div>
+    </div>
+    <div class="cell">
+      <div class="note amber"><strong>Push Notification</strong>Tier-up Alert</div>
+      <div class="note blue">Profile Page (ใหม่ — Unlocked State)</div>
+      <div class="note green">Public URL Card ที่แชร์ได้</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Campaign Banner</strong>บน App Home</div>
+      <div class="note blue">Mission Progress Card ใน Profile</div>
+      <div class="note amber">LINE OA: Mission Reminder</div>
+    </div>
+    <div class="cell">
+      <div class="note blue"><strong>Job Offer Card</strong>ใน App (Premium Tag)</div>
+      <div class="note teal">Customer-facing Profile View</div>
+      <div class="note green">Booking Confirmation ใน App</div>
+    </div>
+    <div class="cell">
+      <div class="note amber"><strong>Document Center</strong>ใน Profile</div>
+      <div class="note blue">PDF Download / Email</div>
+      <div class="note purple">QR Code ยืนยันตัวตน (สำหรับธนาคาร)</div>
+    </div>
+    <div class="cell">
+      <div class="note teal"><strong>LEGEND Badge Card</strong>ที่แชร์ได้</div>
+      <div class="note green">Referral Link ใน App</div>
+      <div class="note purple">I AM Q-CHANG Event Invitation</div>
+    </div>
+  </div>
+
+  <!-- LINE OF INTERACTION -->
+  <div class="line-row line-interaction">
+    <div class="line-row-inner">
+      <div class="line-label">— Line of Interaction</div>
+      <div class="line-dash"></div>
+      <span style="font-size:10px;color:#4B48C8;font-weight:600;">ช่างมองเห็น / สัมผัสได้โดยตรง</span>
+    </div>
+  </div>
+
+  <!-- ══ ROW 3: FRONTSTAGE ══ -->
+  <div class="row-front" style="display:contents;">
+    <div class="row-label">
+      <div class="row-label-icon">🎭</div>
+      <h3>Frontstage</h3>
+      <p>สิ่งที่ทีมงาน<br>ทำให้ช่างเห็น</p>
+    </div>
+
+    <div class="cell">
+      <div class="note purple"><strong>MarComm</strong>สร้าง Creative และ Copy สำหรับ Campaign Launch</div>
+      <div class="note blue">CS ส่ง Broadcast ผ่าน LINE OA ตาม Segment</div>
+    </div>
+    <div class="cell">
+      <div class="note purple"><strong>Product Team</strong>แสดง Onboarding Flow ใน App</div>
+      <div class="note blue">CS ตอบคำถามช่างผ่าน Live Chat</div>
+    </div>
+    <div class="cell">
+      <div class="note blue"><strong>Academy Team</strong>ออก Skill Badge หลังทดสอบผ่าน</div>
+      <div class="note purple">App แสดง Progress Bar + Tip "อีก X Badge"</div>
+    </div>
+    <div class="cell">
+      <div class="note amber"><strong>System</strong>ส่ง Push "Tier-up" Notification อัตโนมัติ</div>
+      <div class="note purple">MarComm Celebrate Post บน Social Media</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>MarComm</strong>อัปเดต Campaign Banner ทุกเดือน</div>
+      <div class="note blue">App แสดง Leaderboard ช่างใน Campaign</div>
+    </div>
+    <div class="cell">
+      <div class="note blue"><strong>Matching Engine</strong>ส่ง Premium Job ให้ช่าง Profile สูง</div>
+      <div class="note teal">App แสดง "ลูกค้าเลือกคุณจาก Profile"</div>
+    </div>
+    <div class="cell">
+      <div class="note amber"><strong>System</strong>ออก PDF Document อัตโนมัติ</div>
+      <div class="note blue">CS ยืนยันความถูกต้องก่อนส่ง</div>
+    </div>
+    <div class="cell">
+      <div class="note teal"><strong>MarComm</strong>ประกาศ LEGEND ใหม่บน Social</div>
+      <div class="note green">CS ส่ง Referral Kit ให้ช่าง LEGEND</div>
+    </div>
+  </div>
+
+  <!-- LINE OF VISIBILITY -->
+  <div class="line-row line-visibility">
+    <div class="line-row-inner">
+      <div class="line-label">— Line of Visibility</div>
+      <div class="line-dash"></div>
+      <span style="font-size:10px;color:#059669;font-weight:600;">ช่างมองไม่เห็น — เกิดขึ้นเบื้องหลัง</span>
+    </div>
+  </div>
+
+  <!-- ══ ROW 4: BACKSTAGE ══ -->
+  <div class="row-back" style="display:contents;">
+    <div class="row-label">
+      <div class="row-label-icon">⚙️</div>
+      <h3>Backstage</h3>
+      <p>กระบวนการ<br>เบื้องหลัง</p>
+    </div>
+
+    <div class="cell">
+      <div class="note green"><strong>Data Team</strong>Segment ช่างตาม Active Rate + Tenure</div>
+      <div class="note teal">Marketing Planning Campaign Calendar รายเดือน</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Tech</strong>ดึงข้อมูล Booking History → Pre-fill Profile</div>
+      <div class="note teal">QA ตรวจสอบข้อมูลก่อน Profile ถูก Publish</div>
+      <div class="fail-point">Data ไม่ sync ระหว่าง Booking System กับ Profile</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Tech</strong>คำนวณ Performance Score แบบ Real-time</div>
+      <div class="note teal">Academy ออกแบบ Curriculum ตาม Job Type</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>System</strong>Run Tier Algorithm ทุกต้นเดือน</div>
+      <div class="note teal">Data validate ความถูกต้องก่อน Tier-up</div>
+    </div>
+    <div class="cell">
+      <div class="note teal"><strong>Marketing</strong>ตั้ง Campaign Rule Engine (Condition/Reward)</div>
+      <div class="note green">Data Track Mission Completion ต่อช่าง</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>AI Matching</strong>Score Profile → ส่ง Job Queue</div>
+      <div class="note teal">Ops ตรวจสอบ Job Completion + Rating หลังงาน</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>AI Agent</strong>ดึง Earning Data → Generate PDF</div>
+      <div class="note teal">Legal Review Template ให้ตรงมาตรฐานธนาคาร</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Data</strong>คำนวณ Referral Attribution + Reward</div>
+      <div class="note teal">HR / Academy ออกแบบ Ambassador Program</div>
+    </div>
+  </div>
+
+  <!-- LINE OF INTERNAL INTERACTION -->
+  <div class="line-row line-internal">
+    <div class="line-row-inner">
+      <div class="line-label">— Line of Internal Interaction</div>
+      <div class="line-dash"></div>
+      <span style="font-size:10px;color:#D97706;font-weight:600;">Third-party / ระบบภายนอกที่รองรับ</span>
+    </div>
+  </div>
+
+  <!-- ══ ROW 5: SUPPORTING ACTIONS ══ -->
+  <div class="row-support" style="display:contents;">
+    <div class="row-label">
+      <div class="row-label-icon">🔗</div>
+      <h3>Supporting Actions</h3>
+      <p>ระบบ / Partner<br>ที่รองรับทั้งหมด</p>
+    </div>
+
+    <div class="cell">
+      <div class="note green"><strong>LINE API</strong>Broadcast + Segment Messaging</div>
+      <div class="note teal">Social Media Platform (FB/IG/TikTok Ads)</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Firebase / AWS</strong>Auth + File Storage (รูปช่าง)</div>
+      <div class="note teal">Q-CHANG Booking DB → Profile Data Feed</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Q-CHANG Academy LMS</strong>Skill Test + Badge Issuance</div>
+      <div class="note teal">กรมพัฒนาฝีมือแรงงาน (Skill Validation)</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Tier Engine (Internal)</strong>คำนวณ Score → Assign Tier</div>
+      <div class="note teal">Notification Service (Push + LINE)</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Campaign Rule Engine</strong>(Condition, Reward, Expiry)</div>
+      <div class="note teal">Q-Points Wallet System (Issue + Redeem)</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>AI Matching Model</strong>Profile Score → Job Routing</div>
+      <div class="note teal">Payment Gateway (Premium Job GP Split)</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>PDF Generation Engine</strong>(AI Agent + Template)</div>
+      <div class="note teal">Financial Partners (ธนาคาร / SME Lender API)</div>
+    </div>
+    <div class="cell">
+      <div class="note green"><strong>Referral Tracking System</strong></div>
+      <div class="note teal">I AM Q-CHANG Event System (Registration)</div>
+      <div class="note amber">CRM — Tag ช่าง LEGEND สำหรับ VIP Program</div>
+    </div>
+  </div>
+
+</div><!-- end blueprint -->
+</div><!-- end blueprint-wrap -->
+
+<!-- EMOTION BAR -->
+<div class="emotion-bar-wrap">
+  <div class="emotion-bar-label">📊 Installer Emotion Journey — ความรู้สึกของช่างในแต่ละ Moment</div>
+  <div class="emotion-track">
+    <div class="emotion-label-cell"><span>Emotion</span></div>
+    <div class="emotion-cell">
+      <div class="emotion-face">😐</div>
+      <div class="emotion-text" style="color:#6366F1;">ยังไม่แน่ใจ<br>"มีประโยชน์ไหม?"</div>
+    </div>
+    <div class="emotion-cell">
+      <div class="emotion-face">😟</div>
+      <div class="emotion-text" style="color:#8B5CF6;">เริ่มรู้สึก<br>ยุ่งยาก</div>
+    </div>
+    <div class="emotion-cell">
+      <div class="emotion-face">🙂</div>
+      <div class="emotion-text" style="color:#EC4899;">เริ่มเห็น<br>ความคืบหน้า</div>
+    </div>
+    <div class="emotion-cell">
+      <div class="emotion-face">🎉</div>
+      <div class="emotion-text" style="color:#F59E0B;">ตื่นเต้น!<br>ภูมิใจมาก</div>
+    </div>
+    <div class="emotion-cell">
+      <div class="emotion-face">⚡</div>
+      <div class="emotion-text" style="color:#10B981;">สนุก!<br>อยากทำต่อ</div>
+    </div>
+    <div class="emotion-cell">
+      <div class="emotion-face">😄</div>
+      <div class="emotion-text" style="color:#3B82F6;">พอใจมาก<br>รายได้ขึ้น</div>
+    </div>
+    <div class="emotion-cell">
+      <div class="emotion-face">😌</div>
+      <div class="emotion-text" style="color:#EF4444;">โล่งใจ<br>ได้หลักฐานแล้ว</div>
+    </div>
+    <div class="emotion-cell">
+      <div class="emotion-face">🏆</div>
+      <div class="emotion-text" style="color:#14B8A6;">ภูมิใจสุดขีด<br>อยากอยู่ต่อ</div>
+    </div>
+  </div>
+</div>
+
+<!-- FAIL POINTS SUMMARY -->
+<div style="padding: 0 32px 32px;">
+  <div style="background:white;border-radius:12px;border:1px solid #E2E8F0;overflow:hidden;">
+    <div style="background:#FFF1F2;padding:12px 20px;border-bottom:1px solid #FCA5A5;display:flex;align-items:center;gap:8px;">
+      <span style="font-size:16px;">⚠️</span>
+      <span style="font-weight:800;font-size:13px;color:#DC2626;">Fail Points Summary — 6 จุดเสี่ยงที่ต้องแก้ก่อน Launch</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#F0F0F0;">
+      <div style="background:white;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">M02 — Onboard</div>
+        <div style="font-size:12px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">ช่างหยุดกลางคันเพราะฟอร์มยาวเกิน</div>
+        <div style="font-size:11px;color:#6B7280;">แก้: ใช้ Step-by-step (3 ขั้นตอน) + Pre-fill จาก Data ที่มี</div>
+      </div>
+      <div style="background:white;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">M02 — Onboard</div>
+        <div style="font-size:12px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">App Crash ระหว่าง Upload รูปโปรไฟล์</div>
+        <div style="font-size:11px;color:#6B7280;">แก้: Compress ก่อน Upload + Retry Logic + Progress Bar</div>
+      </div>
+      <div style="background:white;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">M03 — Build</div>
+        <div style="font-size:12px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">Data ไม่ sync ระหว่าง Booking System กับ Profile</div>
+        <div style="font-size:11px;color:#6B7280;">แก้: Event-driven Sync + Manual Refresh Button + Error State</div>
+      </div>
+      <div style="background:white;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">M05 — Campaign</div>
+        <div style="font-size:12px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">ช่างไม่เข้าใจ Condition ของ Campaign</div>
+        <div style="font-size:11px;color:#6B7280;">แก้: Plain Language Condition + FAQ + Example "นับงานประเภทไหนบ้าง"</div>
+      </div>
+      <div style="background:white;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;color:#DC2626;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">M07 — Financial</div>
+        <div style="font-size:12px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">เอกสารไม่ถูก Format ที่ธนาคารต้องการ</div>
+        <div style="font-size:11px;color:#6B7280;">แก้: ประสาน Legal + ธนาคารล่วงหน้า ทำ Template ที่ผ่าน Acceptance Test</div>
+      </div>
+      <div style="background:white;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;color:#B45309;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">ทุก Moment — Silent Risk</div>
+        <div style="font-size:12px;font-weight:600;color:#1A1A2E;margin-bottom:4px;">ช่างรู้สึกว่า "Profile ไม่มีผลกับงานจริงๆ"</div>
+        <div style="font-size:11px;color:#6B7280;">แก้: ต้องให้ CS/Ops ใช้ Profile Data ในการทำงานด้วย ไม่ใช่แค่ช่างเห็นคนเดียว</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
